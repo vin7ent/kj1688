@@ -27,7 +27,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Vin7ent\\Kj1688\\MongoServiceProvider"
+                "Vin7ent\\Kj1688\\AliKJServiceProvider"
             ]
         }
     }
