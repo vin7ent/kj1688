@@ -1,0 +1,34 @@
+{
+    "name": "vin7ent/kj1688",
+    "description": "F\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[D\u001b[C\u001b[C\u001b[3~\u001b[D\u001b[D\u001b[3~\u001b[C\u001b[D88 vip account to buy and get do\u001b[D\u001b[Dorder number and tracking number.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "vin7ent",
+            "email": "msndmy@163.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "classmap": [
+        "src/commands"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Vin7ent\\Kj1688\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Vin7ent\\Kj1688\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Vin7ent\\Kj1688\\MongoServiceProvider"
+            ]
+        }
+    }
+}
