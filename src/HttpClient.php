@@ -22,7 +22,7 @@ class HttpClient
     {
         $client = new Client([
             'base_uri' => config('alikj.host'),
-            'timeout'  => 2.0
+            'timeout'  => 5.0
         ]);
 
         $headers = [
@@ -33,14 +33,31 @@ class HttpClient
         $parameters['access_token'] = config('alikj.token');
         $parameters['_aop_signature'] = self::signature($url, $parameters, config('alikj.secret'));
 
-        $response = $client->request('POST', $url,
-            [
-                'headers' => $headers,
-                'form_params' => $parameters
-            ]
-        );
+        $retries = 3;
+        while ($retries > 0) {
+            $retries -= 1;
+            try {
+                $response = $client->request('POST', $url,
+                    [
+                        'headers' => $headers,
+                        'form_params' => $parameters
+                    ]
+                );
 
-        return (array)json_decode($response->getBody()->getContents(), true);
+                return json_decode($response->getBody()->getContents(), true);
+            } catch (\Exception $e) {
+                \Log::info('ali http request error code: '. $e->getCode(). ' , message: '. $e->getMessage());
+                if($retries > 1)
+                    sleep(1);
+                else {
+                    return [
+                        'success' => false,
+                        'code' => $e->getCode(),
+                        'message' => $e->getMessage(),
+                    ];
+                }
+            }
+        }
     }
 
     /**
