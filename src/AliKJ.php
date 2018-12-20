@@ -97,6 +97,10 @@ class AliKJ
                         'quantity'  => $product['saleInfo']['minOrderQuantity']
 
                     ];
+                    $area = $product['shippingInfo']['sendGoodsAddressText'];
+                    $area = explode(' ', $area);
+                    $product['province'] = $area[0];
+                    $product['city']    = $area[1];
                     $preview = $this->previewOrder('general', $address, $cargo, $invoice);
                     $product['credit'] = false;
                     $product['freight'] = 0;
