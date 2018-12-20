@@ -23,6 +23,108 @@ class AliKJ
         $this->logistics = self::VERSION. 'com.alibaba.logistics/';
     }
 
+    public function productInfoAll($url, array $address,
+                                   array $invoice = [
+                                       'invoiceType'   => '0',
+                                       'fullName'      => '张三',
+                                       'mobile'        => '15251667788',
+                                       'phone'         => '0517-88990077',
+                                       'postCode'      => '邮编',
+                                       'cityText'      => '杭州市',
+                                       'provinceText'  => '浙江省',
+                                       'areaText'      => '滨江区',
+                                       'townText'      => '长河镇',
+                                       'address'       => '网商路699号',
+                                       'companyName'   => '测试公司',
+                                       'taxpayerIdentifier' => '123455',
+                                       'bankAndAccount'=> '网商银行',
+                                       'localInvoiceId'=> '121231']
+    )
+    {
+        $url = parse_url($url);
+        preg_match('/offer\/(\d+)\.html/', $url['path'], $match);
+        $productId = $match[1] ?? '';
+        if($productId == '') {
+            return [
+                'success' => false,
+                'code'    => -1001,
+                'message' => '链接地址无效'
+            ];
+        }
+        else {
+            $result = $this->sysncProductListPushed([$productId]);
+            if($result['result']['success']) {
+                $product = $this->productInfo($productId);
+                if ($product['success']) {
+                    $product = $product['productInfo'];
+                    $skuInfos = $product['skuInfos'];
+                    $skus = [];
+                    $specId = '';
+                    foreach ($skuInfos as $skuInfo) {
+                        $temp = [];
+                        $temp_attributes = $skuInfo['attributes'];
+                        $temp['attributes'] = '';
+                        foreach ($temp_attributes as $temp_attribute) {
+                            $temp['attributes'] .= ' ['.$temp_attribute['attributeValue'].'] ';
+                        }
+                        $temp['amountOnSale'] = $skuInfo['amountOnSale'];
+                        if(isset($skuInfo['price'])) {
+                            $temp['price'] = $skuInfo['price'];
+                        }
+                        else if(isset($skuInfo['consignPrice'])) {
+                            $temp['price'] = $skuInfo['consignPrice'];
+                        }
+                        else $temp['price'] = 0.0;
+                        $temp['specId'] = $skuInfo['specId'];
+                        $temp['enable'] = false;
+                        if($skuInfo['amountOnSale'] >= $product['saleInfo']['minOrderQuantity']) {
+                            $specId = $skuInfo['specId'];
+                            $temp['enable'] = true;
+                        }
+                        $skus[] = $temp;
+                    }
+                    if($specId == '') {
+                        return [
+                            'success' => false,
+                            'code'    => -1002,
+                            'message' => '所有产品都库存不足'
+                        ];
+                    }
+                    $product['skuInfos'] = $skus;
+                    $cargo = [
+                        'offerId' => $productId,
+                        'specId'  => $specId,
+                        'quantity'  => $product['saleInfo']['minOrderQuantity']
+
+                    ];
+                    $preview = $this->previewOrder('general', $address, $cargo, $invoice);
+                    $product['credit'] = false;
+                    $product['freight'] = 0;
+                    if($preview['success']) {
+                        $preview = $preview['orderPreviewResuslt'][0];
+                        if(in_array('creditBuy', $preview['tradeModeNameList'])) {
+                            $product['credit'] = true;  //是否支持诚e赊
+                        }
+                        $product['freight'] = $preview['sumCarriage']; //运费
+
+                    }
+                    return [
+                        'success' => true,
+                        'data' => $product
+                    ];
+                }
+                else {
+                    return [
+                        'success' => false,
+                        'code'    => -1002,
+                        'message' => '产品详情获取失败'
+                    ];
+                }
+            }
+        }
+
+    }
+
     /*
      * 跨境场景获取商品详情
      * 查询商品详情之前要把产品先push到铺货计划中
@@ -173,6 +275,84 @@ class AliKJ
         $data['tradeType'] = $tradeType;
 
         return HttpClient::sendRequest($this->trade.'alibaba.trade.createCrossOrder', $data);
+    }
+
+    /*
+     * 创建订单
+     * alibaba.trade.createCrossOrder
+     * flow取值范围 general, saleproxy
+     * addressParam 地址信息
+     * cargoParamList 商品信息
+     * 创建跨境订单
+     * */
+
+    public function previewOrder($flow, array $addressParam, array $cargoParamList, $invoiceParam, $message = '')
+    {
+        $data['flow'] = $flow;
+        $data['addressParam'] = $addressParam;
+        $data['cargoParamList'] = $cargoParamList;
+        $data['invoiceParam'] = $invoiceParam;
+        $allAddressParams = [
+            'addressId'     => '收货地址id',
+            'fullName'      => '收货人姓名',
+            'mobile'        => '手机',
+            'phone'         => '电话',
+            'postCode'      => '邮编',
+            'cityText'      => '市文本',
+            'provinceText'  => '省份文本',
+            'areaText'      => '区文本',
+            'townText'      => '镇文本',
+            'address'       => '街道地址',
+            'districtCode'  => '地址编码'
+        ];
+
+        foreach ($allAddressParams as $key => $allAddressParam) {
+            if(!isset($data['addressParam'][$key]))
+                return '缺少参数-addressParam-'.$allAddressParam.'-'.$key;
+        }
+
+        $allCargoParams = [
+            'offerId'   => '商品对应的offer id',
+            'specId'    => '商品规格id',
+            'quantity'  => '商品数量(计算金额用)'
+        ];
+        $data['cargoParamList'] = $cargoParamList;
+
+        foreach ($allCargoParams as $key => $item) {
+            if(!isset($data['cargoParamList'][$key]))
+                return '缺少参数-cargoParamList-'.$item.'-'.$key;
+        }
+
+        if(!empty($message))
+            $data['message'] = $message;
+
+        $allInvoiceParams = [
+            'invoiceType'   => '发票类型',
+            'fullName'      => '收货人姓名',
+            'mobile'        => '手机',
+            'phone'         => '电话',
+            'postCode'      => '邮编',
+            'cityText'      => '市文本',
+            'provinceText'  => '省份文本',
+            'areaText'      => '区文本',
+            'townText'      => '镇文本',
+            'address'       => '街道地址',
+            'companyName'   => '发票抬头',
+            'taxpayerIdentifier' => '纳税识别码',
+            'bankAndAccount'=> '开户行及帐号',
+            'localInvoiceId'=> '增值税本地发票号'
+        ];
+
+        foreach ($allInvoiceParams as $key => $allInvoiceParam) {
+            if(!isset($data['invoiceParam'][$key]))
+                return '缺少参数-addressParam-'.$allInvoiceParam.'-'.$key;
+        }
+
+        $data['addressParam'] = json_encode($data['addressParam']);
+        $data['cargoParamList'] = json_encode($data['cargoParamList']);
+        $data['invoiceParam'] = json_encode($data['invoiceParam']);
+
+        return HttpClient::sendRequest($this->trade.'alibaba.createOrder.preview', $data);
     }
 
     /*

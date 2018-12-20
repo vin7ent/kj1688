@@ -20,6 +20,13 @@ class HttpClient
      */
     public static function sendRequest($url, $parameters)
     {
+        if(!filter_var(config('alikj.host'), FILTER_VALIDATE_URL))
+            return [
+                'success' => false,
+                'code' => -1001,
+                'message' => 'alikj未正确配置',
+            ];
+
         $client = new Client([
             'base_uri' => config('alikj.host'),
             'timeout'  => 5.0
