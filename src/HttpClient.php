@@ -8,6 +8,7 @@
 
 namespace Vin7ent\Kj1688;
 
+use Carbon\Carbon;
 use GuzzleHttp\Client;
 
 class HttpClient
@@ -78,7 +79,7 @@ class HttpClient
         $paramsToSign = array ();
         foreach ( $parameters as $k => $v ) {
             $paramToSign = $k . $v;
-            Array_push ( $paramsToSign, $paramToSign );
+            array_push( $paramsToSign, $paramToSign );
         }
         sort ( $paramsToSign );
         $implodeParams = implode ( $paramsToSign );
@@ -87,5 +88,25 @@ class HttpClient
         $signHexWithLowcase = bin2hex ( $sign );
         $signHexUppercase = strtoupper ( $signHexWithLowcase );
         return $signHexUppercase;
+    }
+
+    public static function aliTime($time)
+    {
+        $index = 0;
+        $year = substr($time, $index, 4);
+        $index += 4;
+        $month = substr($time, $index, 2);
+        $index += 2;
+        $day = substr($time, $index, 2);
+        $index += 2;
+        $hour = substr($time, $index, 2);
+        $index += 2;
+        $minute = substr($time, $index, 2);
+        $index += 2;
+        $second = substr($time, $index, 2);
+
+        $time = Carbon::create($year, $month, $day, $hour, $minute, $second)->toDateTimeString();
+
+        return $time;
     }
 }
