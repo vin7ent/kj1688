@@ -104,6 +104,7 @@ class AliKJ
                     $preview = $this->previewOrder('general', $address, $cargo, $invoice);
                     $product['credit'] = false;
                     $product['freight'] = 0;
+                    $product['lastUpdateTime'] = HttpClient::aliTime($product['lastUpdateTime']);
                     if($preview['success']) {
                         $preview = $preview['orderPreviewResuslt'][0];
                         if(in_array('creditBuy', $preview['tradeModeNameList'])) {
