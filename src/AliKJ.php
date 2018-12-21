@@ -110,7 +110,7 @@ class AliKJ
                         if(in_array('creditBuy', $preview['tradeModeNameList'])) {
                             $product['credit'] = true;  //是否支持诚e赊
                         }
-                        $product['freight'] = $preview['sumCarriage']; //运费
+                        $product['freight'] = number_format($preview['sumCarriage'] / 100.0, 2, '.', ''); //运费强制两位小数
 
                     }
                     return [
