@@ -57,46 +57,64 @@ class AliKJ
                 $product = $this->productInfo($productId);
                 if ($product['success']) {
                     $product = $product['productInfo'];
-                    $skuInfos = $product['skuInfos'];
-                    $skus = [];
-                    $specId = '';
-                    foreach ($skuInfos as $skuInfo) {
-                        $temp = [];
-                        $temp_attributes = $skuInfo['attributes'];
-                        $temp['attributes'] = '';
-                        foreach ($temp_attributes as $temp_attribute) {
-                            $temp['attributes'] .= ' ['.$temp_attribute['attributeValue'].'] ';
+                    if(isset($product['skuInfos'])) {
+                        $skuInfos = $product['skuInfos'];
+                        $skus = [];
+                        $specId = '';
+                        foreach ($skuInfos as $skuInfo) {
+                            $temp = [];
+                            $temp_attributes = $skuInfo['attributes'];
+                            $temp['attributes'] = '';
+                            foreach ($temp_attributes as $temp_attribute) {
+                                $temp['attributes'] .= ' [' . $temp_attribute['attributeValue'] . '] ';
+                            }
+                            $temp['amountOnSale'] = $skuInfo['amountOnSale'];
+                            if (isset($skuInfo['price'])) {
+                                $temp['price'] = $skuInfo['price'];
+                            } elseif (isset($skuInfo['consignPrice'])) {
+                                $temp['price'] = $skuInfo['consignPrice'];
+                            } else $temp['price'] = 0.0;
+                            $temp['specId'] = $skuInfo['specId'];
+                            $temp['enable'] = false;
+                            if ($skuInfo['amountOnSale'] >= $product['saleInfo']['minOrderQuantity']) {
+                                $specId = $skuInfo['specId'];
+                                $temp['enable'] = true;
+                            }
+                            $skus[] = $temp;
                         }
-                        $temp['amountOnSale'] = $skuInfo['amountOnSale'];
-                        if(isset($skuInfo['price'])) {
-                            $temp['price'] = $skuInfo['price'];
+                        if ($specId == '') {
+                            return [
+                                'success' => false,
+                                'code' => -1002,
+                                'message' => '所有产品都库存不足'
+                            ];
                         }
-                        else if(isset($skuInfo['consignPrice'])) {
-                            $temp['price'] = $skuInfo['consignPrice'];
-                        }
-                        else $temp['price'] = 0.0;
-                        $temp['specId'] = $skuInfo['specId'];
-                        $temp['enable'] = false;
-                        if($skuInfo['amountOnSale'] >= $product['saleInfo']['minOrderQuantity']) {
-                            $specId = $skuInfo['specId'];
-                            $temp['enable'] = true;
-                        }
-                        $skus[] = $temp;
-                    }
-                    if($specId == '') {
-                        return [
-                            'success' => false,
-                            'code'    => -1002,
-                            'message' => '所有产品都库存不足'
+                        $product['skuInfos'] = $skus;
+                        $cargo = [
+                            'offerId' => $productId,
+                            'specId' => $specId,
+                            'quantity' => $product['saleInfo']['minOrderQuantity']
+
                         ];
                     }
-                    $product['skuInfos'] = $skus;
-                    $cargo = [
-                        'offerId' => $productId,
-                        'specId'  => $specId,
-                        'quantity'  => $product['saleInfo']['minOrderQuantity']
+                    else {
+                        $specId = '';
+                        $product['skuInfos'] = [
+                            [
+                                'attributes' => '',
+                                'specId'     => '',
+                                'amountOnSale' => $product['saleInfo']['amountOnSale'],
+                                'price'     => $product['saleInfo']['priceRanges'][0]['price'],
+                                'enable'    => $product['saleInfo']['amountOnSale'] >= $product['saleInfo']['minOrderQuantity']
+                            ]
+                        ];
+                        $cargo = [
+                            'offerId' => $productId,
+                            'specId' => $specId,
+                            'quantity' => $product['saleInfo']['minOrderQuantity']
 
-                    ];
+                        ];
+                    }
                     $area = $product['shippingInfo']['sendGoodsAddressText'];
                     $area = explode(' ', $area);
                     $product['province'] = $area[0];
