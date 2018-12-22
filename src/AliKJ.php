@@ -57,7 +57,13 @@ class AliKJ
                 $product = $this->productInfo($productId);
                 if ($product['success']) {
                     $product = $product['productInfo'];
-                    if($product['status'] == 'member expired')
+                    if(in_array($product['status'],[
+                        'member expired',
+                        'auto expired',
+                        'expired',
+                        'member deleted',
+                        'deleted'
+                    ]))
                     {
                         return [
                             'success' => false,
