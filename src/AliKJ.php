@@ -57,6 +57,14 @@ class AliKJ
                 $product = $this->productInfo($productId);
                 if ($product['success']) {
                     $product = $product['productInfo'];
+                    if($product['status'] == 'member expired')
+                    {
+                        return [
+                            'success' => false,
+                            'code'    => -1002,
+                            'message' => '产品下架'
+                        ];
+                    }
                     if(isset($product['skuInfos'])) {
                         $skuInfos = $product['skuInfos'];
                         $skus = [];
