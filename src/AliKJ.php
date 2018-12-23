@@ -62,7 +62,8 @@ class AliKJ
                         'auto expired',
                         'expired',
                         'member deleted',
-                        'deleted'
+                        'deleted',
+                        'TBD'
                     ]))
                     {
                         return [
