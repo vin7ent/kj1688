@@ -58,8 +58,24 @@ class AliKJ
                 'message' => '链接地址无效'
             ];
         }
-        else {
-            $result = $this->sysncProductListPushed([$productId]);
+        else
+            $sync_retires = 0;
+            while (true) {
+                $sync_retires ++;
+                $result = $this->sysncProductListPushed([$productId]);
+                if (isset($result['result'])) {
+                    break;
+                }
+                else {
+                    if ($sync_retires > 3)
+                        return [
+                            'success' => false,
+                            'code' => 404,
+                            'message' => '推送到铺货链接失效'
+                        ];
+                    sleep(1);
+                }
+            }
             if($result['result']['success']) {
                 $product = $this->productInfo($productId);
                 if ($product['success']) {
