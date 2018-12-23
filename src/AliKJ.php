@@ -42,6 +42,13 @@ class AliKJ
     )
     {
         $url = parse_url($url);
+        if(!isset($url['path'])) {
+            return [
+                'success' => false,
+                'code'    => -1001,
+                'message' => '链接地址无效'
+            ];
+        }
         preg_match('/offer\/(\d+)\.html/', $url['path'], $match);
         $productId = $match[1] ?? '';
         if($productId == '') {
