@@ -312,7 +312,11 @@ class AliKJ
 
         foreach ($allAddressParams as $key => $allAddressParam) {
             if(!isset($data['addressParam'][$key]))
-                return '缺少参数-addressParam-'.$allAddressParam.'-'.$key;
+                return [
+                    'success' => false,
+                    'message' => '缺少参数-addressParam-'.$allAddressParam.'-'.$key
+                ];
+
         }
 
         $allCargoParams = [
@@ -323,8 +327,22 @@ class AliKJ
         $data['cargoParamList'] = $cargoParamList;
 
         foreach ($allCargoParams as $key => $item) {
-            if(!isset($data['cargoParamList'][$key]))
-                return '缺少参数-cargoParamList-'.$item.'-'.$key;
+            if(is_array($data['cargoParamList'][0])) {
+                foreach ($data['cargoParamList'] as $cParam) {
+                    if (!isset($cParam[$key]))
+                        return [
+                            'success' => false,
+                            'message' => '缺少参数-cargoParamList-' . $item . '-' . $key
+                        ];
+                }
+            }
+            else {
+                if (!isset($data['cargoParamList'][$key]))
+                    return [
+                        'success' => false,
+                        'message' => '缺少参数-cargoParamList-' . $item . '-' . $key
+                    ];
+            }
         }
 
         if(!empty($message))
@@ -373,7 +391,11 @@ class AliKJ
 
         foreach ($allAddressParams as $key => $allAddressParam) {
             if(!isset($data['addressParam'][$key]))
-                return '缺少参数-addressParam-'.$allAddressParam.'-'.$key;
+                return [
+                    'success' => false,
+                    'message' => '缺少参数-addressParam-'.$allAddressParam.'-'.$key
+                ];
+
         }
 
         $allCargoParams = [
@@ -384,8 +406,22 @@ class AliKJ
         $data['cargoParamList'] = $cargoParamList;
 
         foreach ($allCargoParams as $key => $item) {
-            if(!isset($data['cargoParamList'][$key]))
-                return '缺少参数-cargoParamList-'.$item.'-'.$key;
+            if(is_array($data['cargoParamList'][0])) {
+                foreach ($data['cargoParamList'] as $cParam) {
+                    if (!isset($cParam[$key]))
+                        return [
+                            'success' => false,
+                            'message' => '缺少参数-cargoParamList-' . $item . '-' . $key
+                        ];
+                }
+            }
+            else {
+                if (!isset($data['cargoParamList'][$key]))
+                    return [
+                        'success' => false,
+                        'message' => '缺少参数-cargoParamList-' . $item . '-' . $key
+                    ];
+            }
         }
 
         if(!empty($message))
