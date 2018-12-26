@@ -117,6 +117,7 @@ class AliKJ
                                 $temp['price'] = $skuInfo['consignPrice'];
                             } else $temp['price'] = 0.0;
                             $temp['specId'] = $skuInfo['specId'];
+                            $temp['skuId'] = $skuInfo['skuId'];
                             $temp['enable'] = false;
                             if ($skuInfo['amountOnSale'] >= $product['saleInfo']['minOrderQuantity']) {
                                 $specId = $skuInfo['specId'];
@@ -161,7 +162,7 @@ class AliKJ
                     $area = explode(' ', $area);
                     $product['province'] = $area[0];
                     $product['city']    = $area[1];
-                    $preview = $this->previewOrder('general', $address, $cargo, $invoice);
+                    $preview = $this->previewOrder('general', $address, [$cargo], $invoice);
                     $product['credit'] = false;
                     $product['freight'] = 0;
                     $product['lastUpdateTime'] = HttpClient::aliTime($product['lastUpdateTime']);
