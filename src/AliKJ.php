@@ -551,6 +551,23 @@ class AliKJ
         return $result;
     }
 
+    /*
+     * alibaba.trade.get.buyerView
+     * website： alibaba 1688
+     * orderId: 订单号
+     * 获取订单详情
+     * */
+
+    public function orderInfo($orderId, $webSite = '1688', $includeFields = 'NativeLogistics')
+    {
+        $result = HttpClient::sendRequest($this->trade.'alibaba.trade.get.buyerView', [
+            'webSite' => $webSite,
+            'orderId' => $orderId,
+            'includeFields' => $includeFields,
+        ]);
+        return $result;
+    }
+
 
     
 
