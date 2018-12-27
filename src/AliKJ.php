@@ -282,6 +282,56 @@ class AliKJ
             'logisticsId' => $logisticsId,
         ]);
     }
+    /*
+     * 获取物流信息和详情信息
+     * 把两个接口一起用
+     * */
+    public function getLogisticsAll($orderId, $website = '1688', $fields = 'GuaranteesTerms,NativeLogistics,RateDetail,OrderInvoice')
+    {
+        $result = $this->getLogistics($orderId, $website, $fields);
+        if($result['success']) {
+            $data = [];
+            $result = $result['result'][0];
+            $data['orderEntryIds'] = $result['orderEntryIds'];
+            $data['logisticsId'] = $result['logisticsId'];
+            $data['logisticsCompanyName'] = $result['logisticsCompanyName'];
+            $data['logisticsCompanyId'] = $result['logisticsCompanyId'];
+            $data['status'] = $result['status'];
+            $data['sendGoods'] = $result['sendGoods'];
+
+            $result = $this->getLogisticsDetail($orderId);
+            if($result['success']) {
+                if(isset($result['logisticsTrace'])) {
+                    $result = $result['logisticsTrace'][0];
+                    $data['details'] = $result['logisticsSteps'];
+                }
+                else {
+                    $data['details'] = '未查询到物流信息。';
+                }
+            }
+
+            return [
+                'success' => true,
+                'message' => '物流信息获取成功',
+                'data'    => $data
+            ];
+
+        }
+        else {
+            if($result['errorCode'] == 'success') {
+                return [
+                    'success' => false,
+                    'message' => '卖家还未录入物流信息'
+                ];
+            }
+            else {
+                return [
+                    'success' => false,
+                    'message' => '物流接口请求失败, 原因:' . $result['errorMessage']
+                ];
+            }
+        }
+    }
 
     /*
      * 创建订单
