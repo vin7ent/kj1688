@@ -158,10 +158,16 @@ class AliKJ
 
                         ];
                     }
-                    $area = $product['shippingInfo']['sendGoodsAddressText'];
-                    $area = explode(' ', $area);
-                    $product['province'] = $area[0];
-                    $product['city']    = $area[1];
+                    if(isset($product['shippingInfo']['sendGoodsAddressText'])) {
+                        $area = $product['shippingInfo']['sendGoodsAddressText'];
+                        $area = explode(' ', $area);
+                        $product['province'] = $area[0];
+                        $product['city']    = $area[1];
+                    }
+                    else {
+                        $product['province'] = '未知';
+                        $product['city']    = '未知';
+                    }
                     $preview = $this->previewOrder('general', $address, [$cargo], $invoice);
                     $product['credit'] = false;
                     $product['freight'] = 0;
