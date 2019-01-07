@@ -51,8 +51,11 @@ class HttpClient
                         'form_params' => $parameters
                     ]
                 );
-
-                return json_decode($response->getBody()->getContents(), true);
+                $result = json_decode($response->getBody()->getContents(), true);
+                if(!isset($result['message'])) {
+                    $result['message'] = $result['errorMsg'] ?? '成功';
+                }
+                return $result;
             } catch (\Exception $e) {
                 \Log::info('ali http request error code: '. $e->getCode(). ' , message: '. $e->getMessage());
                 if($retries > 1)

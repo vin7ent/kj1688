@@ -194,7 +194,7 @@ class AliKJ
                     return [
                         'success' => false,
                         'code'    => -1002,
-                        'message' => '产品详情获取失败'
+                        'message' => $product['message']
                     ];
                 }
             }
