@@ -107,8 +107,12 @@ class AliKJ
                             $temp = [];
                             $temp_attributes = $skuInfo['attributes'];
                             $temp['attributes'] = '';
+                            $temp['skuImageUrl'] = '';
                             foreach ($temp_attributes as $temp_attribute) {
                                 $temp['attributes'] .= ' [' . $temp_attribute['attributeValue'] . '] ';
+                                if(isset($temp_attribute['skuImageUrl'])) {
+                                    $temp['skuImageUrl'] = $temp_attribute['skuImageUrl'];
+                                }
                             }
                             $temp['amountOnSale'] = $skuInfo['amountOnSale'];
                             if (isset($skuInfo['price'])) {
@@ -117,6 +121,7 @@ class AliKJ
                                 $temp['price'] = $skuInfo['consignPrice'];
                             } else $temp['price'] = 0.0;
                             $temp['specId'] = $skuInfo['specId'];
+                            $temp['skuId'] = $skuInfo['skuId'];
                             $temp['skuId'] = $skuInfo['skuId'];
                             $temp['enable'] = false;
                             if ($skuInfo['amountOnSale'] >= $product['saleInfo']['minOrderQuantity']) {
