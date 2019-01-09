@@ -305,6 +305,7 @@ class AliKJ
             $result = $result['result'][0];
             $data['orderEntryIds'] = $result['orderEntryIds'];
             $data['logisticsId'] = $result['logisticsId'];
+            $data['trackingNumber'] = $result['logisticsBillNo'];
             $data['logisticsCompanyName'] = $result['logisticsCompanyName'];
             $data['logisticsCompanyId'] = $result['logisticsCompanyId'];
             $data['status'] = $result['status'];
